@@ -1,50 +1,23 @@
-from src_antigo.controllers.pedido_controller import PedidoController
-from src_antigo.repositories.pedido_repository import PedidoRepository
-from src_antigo.services.pedido_service import PedidoService
-from src_antigo.database.connection import DatabaseConnection
-from src_antigo.models.pedido import Pedido
-from src_antigo.models.desconto import DescontoNormal, DescontoPremium, DescontoVIP
+from src.app.frameworks.database.memory_database import MemoryDatabase
+from src.app.adapters.repositories.memory_pedido_repository import MemoryPedidoRepository
+from src.app.use_cases.criar_pedido import CriarPedido
+from src.app.adapters.controllers.pedido_controller import PedidoController
+
+def main() -> None:
+    database = MemoryDatabase()
+    pedido_gateway = MemoryPedidoRepository(database)
+    criar_pedido_use_case = CriarPedido(pedido_gateway)
+    controller = PedidoController(criar_pedido_use_case)
+
+    #Criando pedidos
+    pedido1 = controller.criar_pedido("Cliente A", 100.0, "normal")
+    pedido2 = controller.criar_pedido("Cliente B", 100.0, "vip")
+    pedido3 = controller.criar_pedido("Cliente C", 100.0, "premium")
+
+    print("Pedidos criados:")
+    print(pedido1.cliente, pedido1.valor_original, pedido1.valor_final())
+    print(pedido2.cliente, pedido2.valor_original, pedido2.valor_final())
+    print(pedido3.cliente, pedido3.valor_original, pedido3.valor_final())
 
 if __name__ == "__main__":
-
-    """ 
-    Por algum motivo o código comentado abaixo está funcionando mas o do professor não.
-
-    Sigo investigando para tentar entender o motivo.
-
-    pedido = Pedido("Leonardo", DescontoVIP())
-    pedido.valor_original = 100.0
-
-    service = PedidoService()
-    service.adicionar_pedido(pedido)
-    service.processar_pedidos()
-
-    print(f"Valor original do pedido: {pedido.valor_original}")
-    print(f"Valor final do pedido: {pedido.valor_final(pedido.valor_original)}")
-    """
-
-    database = DatabaseConnection()
-    repo = PedidoRepository(database)
-    service = PedidoService(repo)
-    controller = PedidoController(service)
-    # Perguntar ao professor: Qual a diferença entre pedido_service e pedido_controller?
-    # Motivo da pergunta: Ambas tem def adicionar_pedidos/processar_pedidos
-
-    # """Criando pedidos e aplicando descontos"""
-    pedido1 = Pedido("Cliente A", DescontoNormal())
-    pedido1.valor_orginal = 100.0 # Definindo o valor original do pedido
-
-    pedido2 = Pedido("Cliente B", DescontoVIP())
-    pedido2.valor_orginal = 200.0 # Definindo o valor original do pedido
-
-    pedido3 = Pedido("Cliente C", DescontoPremium())
-    pedido3.valor_orginal = 300.0 # Definindo o valor original do pedido
-
-    # Aqui você pode criar pedidos, aplicar descontos e processar os pedindos
-
-    # Perguntar ao professor: Qual a diferença de usar "service."" e "controller."?
-    controller.adicionar_pedidos(pedido1)
-    controller.adicionar_pedidos(pedido2)
-    controller.adicionar_pedidos(pedido3)
-
-    controller.processar_pedidos()
+    main()
